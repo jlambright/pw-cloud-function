@@ -1,4 +1,4 @@
-const {Collection} = require('./client')
+const { Collection } = require("./client");
 
 module.exports = class RoundsCollection extends Collection {
   _cid = process.env.WF_ROUNDS_ID;
@@ -6,4 +6,4 @@ module.exports = class RoundsCollection extends Collection {
     super();
     this._cid = process.env.WF_ROUNDS_ID;
   }
-}
+};
