@@ -8,13 +8,13 @@ jobs:
     name: Google Cloud Function Deploy
     runs-on: ubuntu-latest
     steps:
-      - id: Setup gCloud SDK
+      - id: setup-gCloud
         uses: google-github-actions/setup-gcloud@master
         with:
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
       - uses: actions/checkout@v2
-      - id: Deploy
+      - id: deploy-cloud-function
         uses: google-github-actions/deploy-cloud-functions@main
         with:
           name: weekly-cron
