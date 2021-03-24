@@ -15,7 +15,8 @@ const getActiveBracket = () => {
 
   let activeBracket;
 
-  bracketsCollection.items()
+  bracketsCollection
+    .items()
     .then((response) => {
       const brackets = response.items;
       brackets.forEach((bracket) => {
@@ -63,7 +64,8 @@ const getActiveRound = () => {
 
   let activeRound;
 
-  roundsCollection.items()
+  roundsCollection
+    .items()
     .then((response) => {
       const rounds = response.items;
       rounds.forEach((round) => {

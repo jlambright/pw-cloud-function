@@ -1,3 +1,12 @@
+name: Deploy to Google Cloud Function
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    name: Google Cloud Function Deploy
+    runs-on: ubuntu-latest
 steps:
   - uses: actions/checkout@v2
   - id: deploy
