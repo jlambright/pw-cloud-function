@@ -6,16 +6,16 @@ const {
 } = require("./webflowclient");
 const logger = require("./logger");
 
-const ds = new Datastore();
+const datastore = new Datastore();
 
 const getActiveBracket = () => {
-  const bc = new BracketsCollection();
+  const bracketsCollection = new BracketsCollection();
 
-  const key = ds.key(["Active", "bracket"]);
+  const key = datastore.key(["Active", "bracket"]);
 
   let activeBracket;
 
-  bc.items()
+  bracketsCollection.items()
     .then((response) => {
       const brackets = response.items;
       brackets.forEach((bracket) => {
@@ -43,7 +43,7 @@ const getActiveBracket = () => {
           ...rounds,
         },
       };
-      ds.save(entity, (err) => {
+      datastore.save(entity, (err) => {
         if (err !== null) {
           logger.error(key.path);
           logger.error(key.namespace);
@@ -56,13 +56,14 @@ const getActiveBracket = () => {
 };
 
 const getActiveRound = () => {
-  const rc = new RoundsCollection();
+  const matchupsCollection = new MatchupsCollection();
+  const roundsCollection = new RoundsCollection();
 
-  const key = ds.key(["Active", "round"]);
+  const key = datastore.key(["Active", "round"]);
 
   let activeRound;
 
-  rc.items()
+  roundsCollection.items()
     .then((response) => {
       const rounds = response.items;
       rounds.forEach((round) => {
@@ -74,58 +75,48 @@ const getActiveRound = () => {
           activeRound = round;
         }
       });
-      const entity = {
-        key: key,
-        data: {
-          _id: activeRound["_id"],
-          start: activeRound["start-of-round"],
-          end: activeRound["end-of-round"],
-          type: activeRound["round-type"],
-          matchups: activeRound["matchups"],
-        },
-      };
-      ds.save(entity, (err) => {
-        if (err !== null) {
-          logger.error(key.path);
-          logger.error(key.namespace);
-        }
+
+      let matchupPromises = activeRound["matchups"].map((matchup_id) => {
+        return matchupsCollection
+          .item(matchup_id)
+          .then((response) => {
+            return {
+              id: matchup_id,
+              stories: {
+                storyA: response["story-a-2"],
+                storyB: response["story-b-2"],
+              },
+            };
+          })
+          .catch((reason) => {
+            if (reason !== null) logger.error(reason);
+          });
       });
+      return Promise.all(matchupPromises)
+        .then((results) => {
+          let data = {
+            _id: activeRound["_id"],
+            start: activeRound["start-of-round"],
+            end: activeRound["end-of-round"],
+            type: activeRound["round-type"],
+            matchups: {},
+          };
+          results.map((result) => {
+            const { id, stories } = result;
+            data["matchups"][id] = stories;
+          });
+          return data;
+        })
+        .catch((reason) => {
+          if (reason !== null) logger.error(reason);
+        });
     })
-    .catch((reason) => {
-      if (reason !== null) logger.error(reason);
-    });
-};
-
-const getActiveMatchups = () => {
-  const mc = new MatchupsCollection();
-
-  const key = ds.key(["Active", "matchups"]);
-
-  let activeMatchups;
-
-  mc.items()
-    .then((response) => {
-      const rounds = response.items;
-      rounds.forEach((round) => {
-        if (
-          round["active-round"] === true &&
-          round["_archived"] === false &&
-          round["_draft"] === false
-        ) {
-          activeMatchups = round;
-        }
-      });
+    .then((results) => {
       const entity = {
         key: key,
-        data: {
-          _id: activeMatchups["_id"],
-          start: activeMatchups["start-of-round"],
-          end: activeMatchups["end-of-round"],
-          type: activeMatchups["round-type"],
-          matchups: activeMatchups["matchups"],
-        },
+        data: results,
       };
-      ds.save(entity, (err) => {
+      datastore.save(entity, (err) => {
         if (err !== null) {
           logger.error(key.path);
           logger.error(key.namespace);
