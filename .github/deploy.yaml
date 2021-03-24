@@ -7,21 +7,21 @@ jobs:
   build:
     name: Google Cloud Function Deploy
     runs-on: ubuntu-latest
-steps:
-  - uses: actions/checkout@v2
-  - id: deploy
-    uses: google-github-actions/deploy-cloud-functions@main
-    with:
-      name: weekly-cron
-      project_id: purple-wall
-      max_instances: 1
-      runtime: nodejs14
-      entry_point: index.js
-      env-vars:
-        WF_API_KEY: ${{ secrets.WF_API_KEY }}
-        WF_CHAMPS_ID: ${{ secrets.WF_CHAMPS_ID }}
-        WF_MATCHES_ID: ${{ secrets.WF_MATCHES_ID }}
-        WF_ROUNDS_ID: ${{ secrets.WF_ROUNDS_ID }}
-        WF_SITE_ID: ${{ secrets.WF_SITE_ID }}
-        WF_STORIES_ID: ${{ secrets.WF_STORIES_ID }}
-      credentials: ${{ secrets.GCP_SA_KEY }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: deploy
+        uses: google-github-actions/deploy-cloud-functions@main
+        with:
+          name: weekly-cron
+          project_id: purple-wall
+          max_instances: 1
+          runtime: nodejs14
+          entry_point: index.js
+          env-vars:
+            WF_API_KEY: ${{ secrets.WF_API_KEY }}
+            WF_CHAMPS_ID: ${{ secrets.WF_CHAMPS_ID }}
+            WF_MATCHES_ID: ${{ secrets.WF_MATCHES_ID }}
+            WF_ROUNDS_ID: ${{ secrets.WF_ROUNDS_ID }}
+            WF_SITE_ID: ${{ secrets.WF_SITE_ID }}
+            WF_STORIES_ID: ${{ secrets.WF_STORIES_ID }}
+          credentials: ${{ secrets.GCP_SA_KEY }}
